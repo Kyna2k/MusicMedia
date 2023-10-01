@@ -28,7 +28,7 @@
             </intent-filter>
         </activity>
         <service android:name=".services.MusicServices"/>
-        <receiver android:name=".Reciver"/>
+        <receiver android:name=".Receiver"/>
     </application>
 
 </manifest>

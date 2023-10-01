@@ -13,9 +13,9 @@ import android.os.Build;
 import androidx.annotation.RequiresApi;
 
 import com.example.appnghenhac.services.MusicServices;
-@RequiresApi(api = Build.VERSION_CODES.S)
 
-public class Reciver extends BroadcastReceiver {
+@RequiresApi(api = Build.VERSION_CODES.S)
+public class Receiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Intent intent1 = new Intent(context, MusicServices.class);

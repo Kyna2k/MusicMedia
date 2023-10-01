@@ -6,14 +6,12 @@ import static com.example.appnghenhac.MainActivity.mediaPlayer;
 import static com.example.appnghenhac.MainActivity.musicArrayList;
 import static com.example.appnghenhac.MyApplication.CHANNEL_ID;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
@@ -23,30 +21,17 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.media.session.MediaSessionCompat;
-import android.widget.RemoteViews;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.NotificationTarget;
-import com.bumptech.glide.request.target.SimpleTarget;
-import com.bumptech.glide.request.target.Target;
-import com.bumptech.glide.request.transition.Transition;
 import com.example.appnghenhac.MainActivity;
 import com.example.appnghenhac.R;
-import com.example.appnghenhac.Reciver;
+import com.example.appnghenhac.Receiver;
 import com.example.appnghenhac.model.Music;
 
 import org.jetbrains.annotations.NotNull;
-
-import java.util.concurrent.ExecutionException;
 
 @RequiresApi(api = Build.VERSION_CODES.S)
 public class MusicServices extends Service {
@@ -154,13 +139,13 @@ public class MusicServices extends Service {
 
     private PendingIntent pendingIntent(@NotNull Context context, int action)
     {
-        Intent intent = new Intent(this, Reciver.class);
+        Intent intent = new Intent(this, Receiver.class);
         intent.putExtra("SVACTION",action);
         intent.setAction("PLAY");
-        return PendingIntent.getBroadcast(context.getApplicationContext(), action, intent,  PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getBroadcast(context.getApplicationContext(), action, intent,
+                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.S)
     private void action(int action)
     {
         switch (action)
@@ -203,7 +188,11 @@ public class MusicServices extends Service {
         {
             mediaPlayer.start();
             isPlay = true;
+            Intent intent = new Intent();
+            intent.setAction("RESUME");
+            sendBroadcast(intent);
             sendNoti(_music);
+
         }
     }
 
@@ -212,6 +201,9 @@ public class MusicServices extends Service {
         {
             mediaPlayer.pause();
             isPlay = false;
+            Intent intent = new Intent();
+            intent.setAction("PAUSE");
+            sendBroadcast(intent);
             sendNoti(_music);
         }
     }

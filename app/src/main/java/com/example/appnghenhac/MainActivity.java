@@ -5,6 +5,7 @@ import static com.example.appnghenhac.services.MusicServices.ACTION_NEXT;
 import static com.example.appnghenhac.services.MusicServices.ACTION_PAUSE;
 import static com.example.appnghenhac.services.MusicServices.ACTION_RESUME;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -33,20 +34,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 @RequiresApi(api = Build.VERSION_CODES.S)
 public class MainActivity extends AppCompatActivity {
-
-
-
-
+    //Static var
     public static ArrayList<Music> musicArrayList = new ArrayList<>();
-
-
     public static int index  = 0;
-
     public static MediaPlayer mediaPlayer = null;
+    public static boolean isPlay = false;
     IntentFilter intentFilter;
     ImageView play,back,next;
     SeekBar seekBar;
-    public static boolean isPlay = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,18 +57,10 @@ public class MainActivity extends AppCompatActivity {
         intentFilter = new IntentFilter();
         intentFilter.addAction("PAUSE");
         intentFilter.addAction("RESUME");
-        chooseImage();
-        ArrayList<HashMap<String,String>> songList=getPlayList(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath());
-        if(songList!=null){
-            for(int i=0;i<songList.size();i++){
-                String fileName=songList.get(i).get("file_name");
-                String filePath=songList.get(i).get("file_path");
-                musicArrayList.add(new Music(fileName,fileName,"",filePath));
-            }
-        }
-
+        //Handle xin quyen
+        xinquyen();
     }
-
+    //Handle click Event
     View.OnClickListener clickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -113,18 +101,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        registerReceiver(receiver,intentFilter);
-    }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unregisterReceiver(receiver);
-
-    }
 
     private void stopSong() {
         Intent intent = new Intent(this, MusicServices.class);
@@ -133,9 +110,7 @@ public class MainActivity extends AppCompatActivity {
         play.setImageResource(R.drawable.baseline_play_circle_24);
     }
 
-
-
-
+    //Ham chơi nhạc
     void playSong()
     {
         if(musicArrayList.size() == 0)
@@ -163,10 +138,23 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(receiver,intentFilter);
+    }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(receiver);
+
+    }
+    //BroadcastReceiver nhận sự kiện từ service
     BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            int x = 2;
             switch (intent.getAction())
             {
                 case "PAUSE" :
@@ -178,12 +166,41 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
-    private void chooseImage() {
+    //Hàm xin quyền
+    private void xinquyen() {
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            //Lấy các file MP3 từ folder down
+            loadMP3();
         } else {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
         }
     }
+
+    private  void loadMP3()
+    {
+        ArrayList<HashMap<String,String>> songList=getPlayList(
+                Environment.getExternalStoragePublicDirectory(
+                                Environment.DIRECTORY_DOWNLOADS)
+                        .getAbsolutePath());
+        if(songList!=null){
+            for(int i=0;i<songList.size();i++){
+                String fileName=songList.get(i).get("file_name");
+                String filePath=songList.get(i).get("file_path");
+                musicArrayList.add(new Music(fileName,fileName,"",filePath));
+            }
+        }
+    }
+    //Kiểm tra nếu xin quyền thành công
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode == 1 && grantResults.length > 0)
+        {
+            loadMP3();
+        }
+    }
+
+    //Hàm truy cập lấy các file có đuôi là mp3
     ArrayList<HashMap<String,String>> getPlayList(String rootPath) {
         ArrayList<HashMap<String,String>> fileList = new ArrayList<>();
         try {
